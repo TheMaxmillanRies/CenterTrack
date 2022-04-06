@@ -42,6 +42,10 @@ Taking the lacking batch size as a source of inspiration, we retrained the basic
 | 8 | 63.8% | 7.4% | 27.9% | 1.2% |
 | 12 | 65.8% | 4.1% | 29.2% | 1.0% |
 
+![](readme/batch_lines.png)
+|:--:|
+| <b>Figure 2: Line chart showing the evolution of FP, FN, IDSW and MOTA over time.</b>|
+
 Looking at the table above, the increase in the batch sizes seems to strongly correlate with an increase in the MOTA (Multiple Object Tracking Accuracy) and a general decreasein the FN count (False Negative). As a larger batch sizes allows a better estimation of the gradient, the general improvement in the accuracy seems fair and accurate to theoretical expectations.
 
 The IDSW percentage (When objects are successfully detected but not tracked) generally remains constant, leading us to assume that the tracking is consistent, and the detection is lacking.
@@ -55,13 +59,21 @@ To investigate the effect of batch size on the accuracy of CenterTrack, we train
 
 | Epoch Count | MOTA | FP | FN | IDSW |
 | ----- | ----- | ----- | ----- | ----- |
-|  | % | % | % | % |
-|  | % | % | % | % |
-|  | % | % | % | % |
-|  | % | % | % | % |
-|  | % | % | % | % |
-
+|  5| 62.4% | 4.6% | 30.8% | 2.1% |
+|  10| 63.5% | 3.4% | 30.8% | 2.3% |
+|  15| 64.1% | 2.7% | 31.1% | 2.1% |
+|  20| 64.6% | 4.4% | 28.9% | 2.1% |
+|  25| 64.8% | 3.6% | 29.6% | 1.9% |
+|  30| 64.7% | 5.4% | 28.0% | 2.0% |
+|  35| 63.4% | 4.0% | 30.6% | 2.0% |
+|  40| 63.6% | 4.7% | 29.6% | 2.1% |
 ----
+
+The final results show a very constant trend over time. Unfortunately, with such a low epoch count it is quite hard to tell whether the model improves over time or not.To better visualize this, we plotted a line chart showing the trend of this 4 components over the span of 40 epochs.
+
+![](readme/epoch_lines.png)
+|:--:|
+| <b>Figure 3: Line chart showing the evolution of FP, FN, IDSW and MOTA over time. Overall, the lines are following a constant trend, with the FN and FP features presenting some small spikes in the middle and close to the end</b>|
 
 ### Optimization Functions
 One of the assumed parameters of the CenterTrack is the usage of the Adam optimization function with a learning rate of 1.25e - 4. This specific choice of optimization function is left unmentioned in the paper, and we thought it interesting to evaluate what we recently learned in the Deep Learning course, and tried training the CenterTrack network on Momentum and RMSProp.
