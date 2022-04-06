@@ -1,161 +1,154 @@
 # Tracking Objects as Points
+By: Maxmillan Ries (5504066), Nafie El Coudi El Amrani (), Cristian Mihai Rosiu (), Jasper Konijn ()
 Simultaneous object detection and tracking using center points:
+
+## Introduction
+
+Tracking objects in a given video or series of images is a common and useful computer vision procedure. In "Tracking Objects as Points", Xingyi Zhou uses the CenterNet Object Detection neural network-based algorithm to present a point-based framework for joint detection and tracking, referred to as CenterTrack. In this article, we will reproduce the algorithm described in this paper, and evaluate different parameters which were described. Specifically, we will train the principle algorithm using different hyperparameters known to affect neural networks, and using parameters unique to the tracking aspect provided by this paper.
+
+## CenterTrack Basics
+
+Xingyi Zhou's algorithm takes as an input several combinations of images. For the principle and most performing algorithm CenterTrack takes 2 timestamp images belonging to a video and a heatmap with the tracking points of the earlier timestamped image, as shown on the left of Figure 1. The tracked object points are obtained using the CenterNet network prediction.
+
 ![](readme/fig2.png)
-> [**Tracking Objects as Points**](http://arxiv.org/abs/2004.01177),            
-> Xingyi Zhou, Vladlen Koltun, Philipp Kr&auml;henb&uuml;hl,        
-> *arXiv technical report ([arXiv 2004.01177](http://arxiv.org/abs/2004.01177))*  
+|:--:|
+| <b>Figure 1: Basic Input and Output of the CenterTrack network.</b>|
 
+Using these three images as inputs, the CenterTrack algorithm outputs a set of tracking points for the recent timestamp, a bounding box size map and an offset map.
 
-    @article{zhou2020tracking,
-      title={Tracking Objects as Points},
-      author={Zhou, Xingyi and Koltun, Vladlen and Kr{\"a}henb{\"u}hl, Philipp},
-      journal={ECCV},
-      year={2020}
-    }
+## Our Setup and Code Replication
 
-Contact: [zhouxy@cs.utexas.edu](mailto:zhouxy@cs.utexas.edu). Any questions or discussion are welcome! 
+As the CenterTrack github/paper provided clear details into the inner workings of their setup, including the optimization strategy, hyperparameters, and the various loss functions and their combinations, the reproduction of the paper aimed to evaluate key aspects of the paper. The experiments conducted were broken down into several categories listed below:
 
-## Abstract
-Tracking has traditionally been the art of following interest points through space and time. This changed with the rise of powerful deep networks. Nowadays, tracking is dominated by pipelines that perform object detection followed by temporal association, also known as tracking-by-detection. In this paper, we present a simultaneous detection and tracking algorithm that is simpler, faster, and more accurate than the state of the art. Our tracker, CenterTrack, applies a detection model to a pair of images and detections from the prior frame. Given this minimal input, CenterTrack localizes objects and predicts their associations with the previous frame. That's it. CenterTrack is simple, online (no peeking into the future), and real-time. It achieves 67.3% MOTA on the MOT17 challenge at 22 FPS and 89.4% MOTA on the KITTI tracking benchmark at 15 FPS, setting a new state of the art on both datasets. CenterTrack is easily extended to monocular 3D tracking by regressing additional 3D attributes. Using monocular video input, it achieves 28.3% AMOTA@0.2 on the newly released nuScenes 3D tracking benchmark, substantially outperforming the monocular baseline on this benchmark while running at 28 FPS.
+- Batch Size
+- Epoch Count
+- Optimization Functions
+- Bounding Box Thresholds
+- Heatmap Thresholds
+- Combined Thresholds
 
+----
 
-## Features at a glance
+### Batch Size
+As we started our training experiments, we tried staying as close to the original setup parameters as possible. However, while the paper clearly states that a Titan Xp 12GB VRAM Graphics Card was used, a T4 with 16GB of RAM was found to be far lacking. As a consequence, we could use at most a batch of 12, in comparison to the paper's stated batch size of 32. 
 
-- One-sentence method summary: Our model takes the current frame, the previous frame, and a heatmap rendered from previous tracking results as input, and predicts the current detection heatmap as well as their offsets to centers in the previous frame.
+Taking the lacking batch size as a source of inspiration, we retrained the basic CenterTrack network on varying batch sizes, resulting in the table below. All parameters were kept constant relative to the basic MOT half train/val split described in the paper, with only the epoch count being decreased though kept constant. 
 
-- The model can be trained on still **image datasets** if videos are not available.
+| Batch Size | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| 1 | 54.1% | 4.1% | 40.6% | 1.2% |
+| 2 | 59% | 6.9% | 33.0% | 1.1% |
+| 4 | 59.7% | 9.4% | 29.9% | 1.0% |
+| 8 | 63.8% | 7.4% | 27.9% | 1.2% |
+| 12 | 65.8% | 4.1% | 29.2% | 1.0% |
 
-- Easily extends to monocular 3d object tracking, multi-category tracking, and pose tracking.
+Looking at the table above, the increase in the batch sizes seems to strongly correlate with an increase in the MOTA (Multiple Object Tracking Accuracy) and a general decreasein the FN count (False Negative). As a larger batch sizes allows a better estimation of the gradient, the general improvement in the accuracy seems fair and accurate to theoretical expectations.
 
-- State-of-the-art performance on MOT17, KITTI, and nuScenes monocular tracking benchmarks.
+The IDSW percentage (When objects are successfully detected but not tracked) generally remains constant, leading us to assume that the tracking is consistent, and the detection is lacking.
 
-## Main results
+----
 
-### Pedestrian tracking on MOT17 test set
+### Epoch Count
+One of the observed difficulties when reproducing the CenterTrack paper was the time required to train. For a single epoch to train on a batch size of 12, it would take 12min24s on average. As the paper states to train for 70 epochs, the total training time for a single model would be ~14.5 hours.
 
-| Detection    |  MOTA     | FPS    |
-|--------------|-----------|--------|
-|Public        | 61.5      |  22    |
-|Private       | 67.8      |  22    |
+To investigate the effect of batch size on the accuracy of CenterTrack, we trained the base model with different epoch counts, whilst maintaining the same parameters and train/val split as described in the paper. The results are shown below:
 
-### 2D vehicle tracking on KITTI test set (with flip test)
+| Epoch Count | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+|  | % | % | % | % |
+|  | % | % | % | % |
+|  | % | % | % | % |
+|  | % | % | % | % |
+|  | % | % | % | % |
 
-|  MOTA       |  FPS   |
-|-------------|--------|
-| 89.44       |   15   |
+----
 
-### 3D tracking on nuScenes test set
+### Optimization Functions
+One of the assumed parameters of the CenterTrack is the usage of the Adam optimization function with a learning rate of 1.25e - 4. This specific choice of optimization function is left unmentioned in the paper, and we thought it interesting to evaluate what we recently learned in the Deep Learning course, and tried training the CenterTrack network on Momentum and RMSProp.
+The expectation with the training is for Adam to perfom the best, with RMSProp coming in second and Momentum in third.
 
-|  AMOTA @ 0.2  |  AMOTA  |  FPS   |
-|---------------|---------|--------|
-| 27.8          |    4.6  | 28     |
+| Epoch Count | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| Momentum | 61.1% | 8.7% | 27.7% | 2.5% |
+| RMSProp | 64.3% | 6.0% | 27.1% | 2.3% |
+| Adam | 64.1% | 4.5% | 29.4% | 1.9% |
 
-Besides benchmark evaluation, we also provide models for 80-category tracking and pose tracking trained on COCO. See the sample visual results below (Video files from [openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) and [YOLO](https://pjreddie.com/darknet/yolov2/)).
+The results of our experiment indicate that the RMSProp optimization function best trained the network. While these results could not be verified with multiple runs (due to time constraints), this observation feels false. Firstly, the Adam optimization function builds on RMSProp, and combines it with Momentum to create a more robust function. 
 
-<p align="center"> <img src='readme/coco_det.gif' align="center" height="230px"> </p> 
+Additionally, the IDSW column indicates, that the Adam trained network most succesfully tracked an object if it was detected (difference of at least 0.4). The FP count is also lower for Adam, leading us to believe that the models trained with RMSProp and Momentum made more incorrect detections, while the model trained by Adam made more conservative detections. This would explain why the RMSProp results appear better than that of Adams, though the difference is negiligible enough to not be considered significant.
 
-<p align="center"> <img src='readme/coco_pose.gif' align="center" height="230px"> </p>
+----
 
-All models and details are available in our [Model zoo](readme/MODEL_ZOO.md).
+### Bounding Box Threshold
+The paper vaguely describes the θ thresholds as the "bounding box" confidence threshold. It does however describe that the MOTA is sensitive to the task-dependent output threshold θ. Additionally, the paper describes an optimal combination of threshold of θ = 0.5 and 𝜏 = 0.4 (see Heatmap Threshold section for 𝜏). In order to further learn about the influence of this parameter, we decided to investigate its effect on CenterTrack's performance.
 
-## Installation
+The CenterTrack project comes with a series of optional parameters which can be set and modified manually for any training. After some reading into the various parameters available, we found that the --track_-_tresh parameter translated to the θ threshold.
 
-Please refer to [INSTALL.md](readme/INSTALL.md) for installation instructions.
+| θ | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| 0 | 64.7% | 5.9% | 27.6% | 1.9% |
+| 0.1 | 63.3% | 10.1% | 25.2% | 1.4% |
+| 0.2 | 63% | 7.6% | 27.7% | 1.7% |
+| 0.3 | 63.2% | 6.7% | 27.9% | 2.2% |
+| 0.4 | 62.6% | 4.6% | 30.3% | 2.5% |
+| 0.5 | 59.2% | 1.5% | 37.0% | 2.3% |
 
-## Use CenterTrack
+Observing the results of the experiment, one can clearly see that increasing the θ threshold results in a general decrease of the MOTA and the FP percentage, and an increase in both the FN and IDSW results.
 
-We support demo for videos, webcam, and image folders. 
+----
 
-First, download the models (By default, [nuscenes\_3d\_tracking](https://drive.google.com/open?id=1e8zR1m1QMJne-Tjp-2iY_o81hn2CiQRt) for monocular 3D tracking, [coco_tracking](https://drive.google.com/open?id=1tJCEJmdtYIh8VuN8CClGNws3YO7QGd40) for 80-category detection and 
-[coco_pose_tracking](https://drive.google.com/open?id=1H0YvFYCOIZ06EzAkC2NxECNQGXxK27hH) for pose tracking) 
-from the [Model zoo](readme/MODEL_ZOO.md) and put them in `CenterNet_ROOT/models/`.
+### Heatmap Treshold
+In order to improve the tracking capabilities of CenterTrack, Xingyi Zhou introduced the usage of prior detections as an additional input. Using the point-based nature of the tracking to his/her advantage, CenterTrack renders all detections in a class-agnostic single-channel heatmap using a Gaussian render function. To avoid propagation of false positive detections, only the objects with a certain confidence score greater than threshold 𝜏 are rendered. This 𝜏 hyperparameters is specifically set by the user before training.
 
-We provide a video clip from the [nuScenes dataset](https://www.nuscenes.org/?externalData=all&mapData=all&modalities=Any) in `videos/nuscenes_mini.mp4`.
-To test monocular 3D tracking on this video, run
+We chose to investigate the benefit of this parameter vis-a-vis the false positive propagation and general accuracy. In the CenterTrack implementation, this is alterable using the pre-thresh optional argument upon training and testing.
 
-~~~
-python demo.py tracking,ddd --load_model ../models/nuScenes_3Dtracking.pth --dataset nuscenes --pre_hm --track_thresh 0.1 --demo ../videos/nuscenes_mini.mp4 --test_focal_length 633
-~~~
+| 𝜏 | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| 0 | 64.7% | 5.9% | 27.6% | 1.9% |
+| 0.1 | 63.4% | 6.1% | 28.5% | 2.0% |
+| 0.2 | 62.9% | 4.2% | 30.6% | 2.4% |
+| 0.3 | 65.5% | 4.4% | 28.2% | 1.8% |
+| 0.4 | 63.6% | 4.7% | 29.3% | 2.4% |
+| 0.5 | 65.1% | 5.5% | 27.5% | 1.9% |
 
-You will need to specify `test_focal_length` for monocular 3D tracking demo to convert the image coordinate system back to 3D.
-The value `633` is half of a typical focal length (`~1266`) in nuScenes dataset in input resolution `1600x900`.
-The mini demo video is in an input resolution of `800x448`, so we need to use a half focal length.
-You don't need to set the `test_focal_length` when testing on the original nuScenes data.
+Observing the table, we could not find a specific pattern which suggests that the 𝜏 thresholds truly reduces the propagation of false positive detections. 
 
-If setup correctly, you will see an output video like:
+----
 
-<p align="center"> <img src='readme/nuscenes_3d.gif' align="center" height="230px"> </p>
+### Combined Thresholds
+In the previous sections, we elaborated on our experiments aimed at testing the influence of the bounding box and heatmap thresholds separately. The CenterTrack paper however clearly states that for the MOT17 dataset, a θ = 0.5 and 𝜏 = 0.4 combination is optimal according to their experiments.
 
+Due to our limited timeframe, we investigated several combinations of θ and 𝜏, where both variables were equal, as depicted below:
 
-Similarly, for 80-category tracking on images/ video, run:
+| θ | 𝜏 | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| 0 | 0 | % | % | % | % |
+| 0.1 | 0.1 | 64.7% | 7.8% | 26.3% | 1.2% |
+| 0.2 | 0.2 | 65.9% | 6.3% | 26.4% | 1.3% |
+| 0.3 | 0.3 | 64.0% | 5.1% | 29.0% | 2.0% |
+| 0.4 | 0.4 | 62.6% | 3.5% | 31.5% | 2.4% |
+| 0.5 | 0.5 | 58.2% | 1.8% | 36.8% | 3.2% |
 
-~~~
-python demo.py tracking --load_model ../models/coco_tracking.pth --demo /path/to/image/or/folder/or/video 
-~~~
+----
 
-If you want to test with person tracking models, you need to add `--num_class 1`:
+### Table 4 - MOT17
+As instructed as part of the reproduction of the code, we investigate the results of Table 4 and attempted to reproduce them. While the exact results could not be perfectly reproduce, the method used to obtain each experiment was verified in conjunction with the mathematical notions denoted in the paper.
 
-~~~
-python demo.py tracking --load_model ../models/mot17_half.pth --num_class 1 --demo /path/to/image/or/folder/or/video 
-~~~
+|  | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+|  | % | % | % | % |
+| w/o offset | 63.8% | 4.3% | 30.0% | 1.9% |
+| w/o heatmap | 65.3% | 3.8% | 29.0% | 1.8% |
+| Ours | 66.1% | 4.5% | 28.4% | 1.0% |
 
-For webcam demo, run     
+The principle difference with the results of Table 4 from the paper is that removing the offset is seen to be far more detrimental. While the FP count is similar, the FN and IDSW counts are higher than the paper's counterpart and the MOTA is substantially lower. To be perfectly honest, we are not sure why this is specifically the case. The paper does not properly describe how the experiments were specifically conducted for Table 4, beyond providing a general description of what each experiment aimed to investigate.
 
-~~~
-python demo.py tracking --load_model ../models/coco_tracking.pth --demo webcam 
-~~~
+As we made sure to use the validation split of section 5.1, our suspicion is that the model were fully trained without using transfer-learning, with the crowdhuman provided model corresponding to the most successful training (the "Ours" training result).
+Unfortunately, we did not have the time to investigate the possibility, as fine-tuning the pretrained network takes ~14.5 hours, and training the entire network from scratch would take over a day.
 
-For monocular 3D tracking, run 
+----
 
-~~~
-python demo.py tracking,ddd --demo webcam --load_model ../models/coco_tracking.pth --demo /path/to/image/or/folder/or/video/or/webcam 
-~~~
+#### Conclusion
+The CenterTrack paper presents itself as a fresh attempt at object detection and tracking based on a point-based system. While some of our results contradict the statements presented in the paper, notably with regards to the thresholds, the majority of our results follow the same interesting trends. For now, as we have not had the chance to evaluate the paper's results on a different dataset, we can only remain skeptical about the performance of the paper outside of it's testing domain. The author does however describe the project to work on video data, and the KTTI dataset, providing some confidence in its applicability. 
 
-Similarly, for pose tracking, run:
-
-~~~
-python demo.py tracking,multi_pose --load_model ../models/coco_pose.pth --demo /path/to/image/or/folder/or/video/or/webcam 
-~~~
-The result for the example images should look like:
-
-You can add `--debug 2` to visualize the heatmap and offset predictions.
-
-To use this CenterTrack in your own project, you can 
-
-~~~
-import sys
-CENTERTRACK_PATH = /path/to/CenterTrack/src/lib/
-sys.path.insert(0, CENTERTRACK_PATH)
-
-from detector import Detector
-from opts import opts
-
-MODEL_PATH = /path/to/model
-TASK = 'tracking' # or 'tracking,multi_pose' for pose tracking and 'tracking,ddd' for monocular 3d tracking
-opt = opts().init('{} --load_model {}'.format(TASK, MODEL_PATH).split(' '))
-detector = Detector(opt)
-
-images = ['''image read from open cv or from a video''']
-for img in images:
-  ret = detector.run(img)['results']
-~~~
-Each `ret` will be a list dict: `[{'bbox': [x1, y1, x2, y2], 'tracking_id': id, ...}]`
-
-## Training on custom dataset
-
-If you want to train CenterTrack on your own dataset, you can use `--dataset custom` and manually specify the annotation file, image path, input resolutions, and number of categories. You still need to create the annotation files in COCO format (referring to the many `convert_X_to_coco.py` examples in `tools`). For example, you can use the following command to train on our [mot17 experiment](experiments/mot17_half_sc.sh) without using the pre-defined mot dataset file:
-
-~~~
-python main.py tracking --exp_id mot17_half_sc --dataset custom --custom_dataset_ann_path ../data/mot17/annotations/train_half.json --custom_dataset_img_path ../data/mot17/train/ --input_h 544 --input_w 960 --num_classes 1 --pre_hm --ltrb_amodal --same_aug --hm_disturb 0.05 --lost_disturb 0.4 --fp_disturb 0.1 --gpus 0,1
-
-~~~
-
-## Benchmark Evaluation and Training
-
-After [installation](readme/INSTALL.md), follow the instructions in [DATA.md](readme/DATA.md) to setup the datasets. Then check [GETTING_STARTED.md](readme/GETTING_STARTED.md) to reproduce the results in the paper.
-We provide scripts for all the experiments in the [experiments](experiments) folder.
-
-## License
-
-CenterTrack is developed upon [CenterNet](https://github.com/xingyizhou/CenterNet). Both codebases are released under MIT License themselves. Some code of CenterNet are from third-parties with different licenses, please check the CenterNet repo for details. In addition, this repo uses [py-motmetrics](https://github.com/cheind/py-motmetrics) for MOT evaluation and [nuscenes-devkit](https://github.com/nutonomy/nuscenes-devkit) for nuScenes evaluation and preprocessing. See [NOTICE](NOTICE) for detail. Please note the licenses of each dataset. Most of the datasets we used in this project are under non-commercial licenses.
-
+The only personal fault with the paper's results is the final optimal 66.1% accuracy, which generally makes this project harder to use in an interesting context, as its results feel unreliable (slightly better than a coin flip). We feel that the error propagation caused by the hierarchical structure (Detection -> Tracking) causes the mixed results, as the IDSW results consistently indicate that the Tracking is accurate, but the CenterNet detection is not. An investigation of another point-based detection network within the CenterTrack context could be very interesting.
