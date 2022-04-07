@@ -1,5 +1,5 @@
 # Tracking Objects as Points
-By: Maxmillan Ries (5504066), Nafie El Coudi El Amrani (), Cristian Mihai Rosiu (), Jasper Konijn ()
+By: Maxmillan Ries (5504066), Nafie El Coudi El Amrani (4771338), Cristian Mihai Rosiu (), Jasper Konijn ()
 Simultaneous object detection and tracking using center points:
 
 ## Introduction
@@ -105,7 +105,7 @@ The CenterTrack project comes with a series of optional parameters which can be 
 | 0.4 | 62.6% | 4.6% | 30.3% | 2.5% |
 | 0.5 | 59.2% | 1.5% | 37.0% | 2.3% |
 
-Observing the results of the experiment, one can clearly see that increasing the θ threshold results in a general decrease of the MOTA and the FP percentage, and an increase in both the FN and IDSW results.
+Observing the results of the experiment, one can clearly see that increasing the θ threshold results in a general decrease of the MOTA and the FP percentage, and an increase in both the FN and IDSW results. We see generally that higher bounding box threshold causes a decrease in performance. This decrease contradicts what was mentionned on the paper and can be explained with the difference in settings between the experiments on the paper and the settings we set up for ourselves. First, the bath size during these experiments was 8 instead of 32 as the authors did in the paper and low epoch counts. 
 
 ----
 
@@ -123,7 +123,9 @@ We chose to investigate the benefit of this parameter vis-a-vis the false positi
 | 0.4 | 63.6% | 4.7% | 29.3% | 2.4% |
 | 0.5 | 65.1% | 5.5% | 27.5% | 1.9% |
 
-Observing the table, we could not find a specific pattern which suggests that the 𝜏 thresholds truly reduces the propagation of false positive detections. 
+Observing the table, we could not find a specific pattern which suggests that the 𝜏 thresholds truly reduces the propagation of false positive detections. The same observation can be seen in the number changes of the MOTA and false negatives. The results of this group of experiments can also be explained by the differnece in epoch count and small batch sizes ( 8 vs 32 ). 
+
+As we couldn't run the expriments with higher epoch count and batch sizes, we can't say for sure that this trend of semi-random values will happen again in another experiment setting. Therefore, we conclude that these experiments are not representative of the performance of CenterTrack and need more investigation to be able to find an optimal value and reach numbers similar to the ones reported on the paper. 
 
 ----
 
@@ -134,12 +136,14 @@ Due to our limited timeframe, we investigated several combinations of θ and �
 
 | θ | 𝜏 | MOTA | FP | FN | IDSW |
 | ----- | ----- | ----- | ----- | ----- | ----- |
-| 0 | 0 | % | % | % | % |
+| 0 | 0 | 43.5% | 31.5% | 24.0% | 1.0% |
 | 0.1 | 0.1 | 64.7% | 7.8% | 26.3% | 1.2% |
 | 0.2 | 0.2 | 65.9% | 6.3% | 26.4% | 1.3% |
 | 0.3 | 0.3 | 64.0% | 5.1% | 29.0% | 2.0% |
 | 0.4 | 0.4 | 62.6% | 3.5% | 31.5% | 2.4% |
 | 0.5 | 0.5 | 58.2% | 1.8% | 36.8% | 3.2% |
+
+Similar to the previous set of experiments, no clear trend can be observed in these test except a decrease in false positive as the values of both θ and 𝜏 get higher. This observation can probably be explained with the . The values seem to be optimal at θ = 0.2 and 𝜏 = 0.2. However, the decision to run the experiments with same values for both parameters was arbitrary. Therefore, we cannot say anything about the results of the experiments where both parameters are different (possible tests to run in the future to verify the claims of the paper). 
 
 ----
 
