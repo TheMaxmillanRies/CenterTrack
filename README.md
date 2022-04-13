@@ -132,6 +132,15 @@ We chose to investigate the benefit of this parameter vis-a-vis the false positi
 | 0.4 | 63.6% | 4.7% | 29.3% | 2.4% |
 | 0.5 | 65.1% | 5.5% | 27.5% | 1.9% |
 
+| 𝜏 | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| 0 | | | | 
+| 0.1 | 55.5% | 7.5% | 34.7% | 2.7% |
+| 0.2 | 57.3% | 6.5% | 33.9% | 2.3% |
+| 0.3 | 56.2% | 8.3% | 32.7% | 2.8% |
+| 0.4 | 56.4% | 6.4% | 34.9% | 2.4% |
+| 0.5 | 56.6% | 7.1% | 34.0% | 2.3% |
+
 Observing the table, we could not find a specific pattern which suggests that the 𝜏 thresholds truly reduces the propagation of false positive detections. The same observation can be seen in the number changes of the MOTA and false negatives. The results of this group of experiments can also be explained by the differnece in epoch count and small batch sizes ( 8 vs 32 ). 
 
 As we couldn't run the expriments with higher epoch count and batch sizes, we can't say for sure that this trend of semi-random values will happen again in another experiment setting. Therefore, we conclude that these experiments are not representative of the performance of CenterTrack and need more investigation to be able to find an optimal value and reach numbers similar to the ones reported on the paper. 
@@ -151,6 +160,15 @@ Due to our limited timeframe, we investigated several combinations of θ and �
 | 0.3 | 0.3 | 64.0% | 5.1% | 29.0% | 2.0% |
 | 0.4 | 0.4 | 62.6% | 3.5% | 31.5% | 2.4% |
 | 0.5 | 0.5 | 58.2% | 1.8% | 36.8% | 3.2% |
+
+| θ | 𝜏 | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| 0 | 0 | | | | |
+| 0.1 | 0.1 | | | | |
+| 0.2 | 0.2 | | | | |
+| 0.3 | 0.3 | 63.1% | 5.1% | 29.6% | 2.2% |
+| 0.4 | 0.4 | 63.4% | 3.4% | 30.9% | 2.3% |
+| 0.5 | 0.5 | 58.5% | 1.7% | 36.7% | 3.2% |
 
 Similar to the previous set of experiments, no clear trend can be observed in these test except a decrease in false positive as the values of both θ and 𝜏 get higher. This observation can probably be explained with the . The values seem to be optimal at θ = 0.2 and 𝜏 = 0.2. However, the decision to run the experiments with same values for both parameters was arbitrary. Therefore, we cannot say anything about the results of the experiments where both parameters are different (possible tests to run in the future to verify the claims of the paper). 
 
