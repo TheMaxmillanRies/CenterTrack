@@ -105,6 +105,15 @@ The CenterTrack project comes with a series of optional parameters which can be 
 | 0.4 | 62.6% | 4.6% | 30.3% | 2.5% |
 | 0.5 | 59.2% | 1.5% | 37.0% | 2.3% |
 
+| θ | MOTA | FP | FN | IDSW |
+| ----- | ----- | ----- | ----- | ----- |
+| 0   | % | % | % | % |
+| 0.1 | 55.1% | 11.6% | 31.9% | 1.5% |
+| 0.2 | 53.8% | 11.8% | 32.6% | 1.8% |
+| 0.3 | 55.1% | 6.8% | 35.7% | 2.5% |
+| 0.4 | 56.3% | 4.9% | 36.6% | 2.2% |
+| 0.5 | 51.6% | 1.3% | 44.1% | 3.0% |
+
 Observing the results of the experiment, one can clearly see that increasing the θ threshold results in a general decrease of the MOTA and the FP percentage, and an increase in both the FN and IDSW results. We see generally that higher bounding box threshold causes a decrease in performance. This decrease contradicts what was mentionned on the paper and can be explained with the difference in settings between the experiments on the paper and the settings we set up for ourselves. First, the bath size during these experiments was 8 instead of 32 as the authors did in the paper and low epoch counts. 
 
 ----
