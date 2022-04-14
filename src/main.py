@@ -21,7 +21,7 @@ def get_optimizer(opt, model):
     print('Using SGD')
     optimizer = torch.optim.SGD(
       model.parameters(), opt.lr, momentum=0.9, weight_decay=0.0001)
-  elif:
+  elif opt.optim == 'rms':
   	optimizer = torch.optim.RMSprop( model.parameters(), opt.lr)
   else:
     assert 0, opt.optim
